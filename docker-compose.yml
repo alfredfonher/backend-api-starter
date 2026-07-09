@@ -1,0 +1,39 @@
+services:
+  api:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/backend_api_starter?schema=public
+      JWT_SECRET: replace-with-at-least-32-characters
+      JWT_EXPIRES_IN: 1h
+      BCRYPT_ROUNDS: 12
+      CORS_ORIGIN: '*'
+      SEED_ADMIN_NAME: Admin User
+      SEED_ADMIN_EMAIL: admin@example.com
+      SEED_ADMIN_PASSWORD: change-me-in-local-env
+    ports:
+      - '5055:3000'
+
+  postgres:
+    image: postgres:17.7-trixie
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: backend_api_starter
+    ports:
+      - '5050:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d backend_api_starter']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
